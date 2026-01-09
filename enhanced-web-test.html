@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barkod Okutucu - Gelişmiş Web Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .search-section h3 {
+            margin-bottom: 15px;
+            color: #4CAF50;
+            text-align: center;
+        }
+        
+        .barcode-input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 15px;
+            border-left: 4px solid #4CAF50;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.error {
+            background: rgba(244, 67, 54, 0.2);
+            border-left-color: #F44336;
+        }
+        
+        .result h4 {
+            margin-bottom: 15px;
+            color: #4CAF50;
+            text-align: center;
+        }
+        
+        .result.error h4 {
+            color: #F44336;
+        }
+        
+        .result-grid {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .result-item strong {
+            color: #FFD700;
+            min-width: 100px;
+        }
+        
+        .result-value {
+            text-align: right;
+            flex: 1;
+        }
+        
+        .categories-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .categories-section h3 {
+            margin-bottom: 15px;
+            color: #FFD700;
+            text-align: center;
+        }
+        
+        .category-group {
+            margin-bottom: 15px;
+        }
+        
+        .category-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .barcode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        
+        .test-barcode {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-barcode:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .barcode-number {
+            font-family: monospace;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .barcode-name {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .barcode-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📱</div>
+            <h1>Barkod Okutucu</h1>
+            <p class="subtitle">
+                Gelişmiş Web Test - Gerçek API'ler + Kapsamlı Veritabanı
+            </p>
+        </div>
+        
+        <div class="search-section">
+            <h3>🔍 Barkod Arama</h3>
+            
+            <input 
+                type="text" 
+                class="barcode-input" 
+                id="barcodeInput"
+                placeholder="Barkod numarasını girin..."
+                maxlength="13"
+            >
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="searchProduct()" id="searchBtn">
+                    🔍 Ara
+                </button>
+                <button class="btn" onclick="simulateCamera()" id="cameraBtn">
+                    📷 Rastgele
+                </button>
+                <button class="btn" onclick="clearResult()" style="background: #FF5722;">
+                    🗑️ Temizle
+                </button>
+            </div>
+            
+            <div class="result" id="result">
+                <h4 id="resultTitle">📦 Ürün Bilgileri</h4>
+                <div id="resultContent"></div>
+            </div>
+        </div>
+        
+        <div class="categories-section">
+            <h3>🧪 Test Barkodları</h3>
+            
+            <div class="category-group">
+                <div class="category-title">🇹🇷 Türk Ürünleri</div>
+                <div class="barcode-grid">
+                    <div class="test-barcode" onclick="fillBarcode('8690504045014')">
+                        <div class="barcode-number">8690504045014</div>
+                        <div class="barcode-name">Ülker Çikolata</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('8690632006116')">
+                        <div class="barcode-number">8690632006116</div>
+                        <div class="barcode-name">Dimes Meyve Suyu</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('8690504001015')">
+                        <div class="barcode-number">8690504001015</div>
+                        <div class="barcode-name">Ülker Bisküvi</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('8690637001011')">
+                        <div class="barcode-number">8690637001011</div>
+                        <div class="barcode-name">Sütaş Ayran</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-title">🌍 Uluslararası Markalar</div>
+                <div class="barcode-grid">
+                    <div class="test-barcode" onclick="fillBarcode('4902430735296')">
+                        <div class="barcode-number">4902430735296</div>
+                        <div class="barcode-name">Kit Kat</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('5449000000996')">
+                        <div class="barcode-number">5449000000996</div>
+                        <div class="barcode-name">Coca Cola</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('3017620422003')">
+                        <div class="barcode-number">3017620422003</div>
+                        <div class="barcode-name">Nutella</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('4056489314592')">
+                        <div class="barcode-number">4056489314592</div>
+                        <div class="barcode-name">Nivea Krem</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category-group">
+                <div class="category-title">🧪 Gerçek API Testi</div>
+                <div class="barcode-grid">
+                    <div class="test-barcode" onclick="fillBarcode('737628064502')">
+                        <div class="barcode-number">737628064502</div>
+                        <div class="barcode-name">API Test 1</div>
+                    </div>
+                    <div class="test-barcode" onclick="fillBarcode('012000073496')">
+                        <div class="barcode-number">012000073496</div>
+                        <div class="barcode-name">API Test 2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats">
+            📊 Toplam <span id="totalSearches">0</span> arama yapıldı
+        </div>
+        
+        <div class="footer">
+            <p>💡 Gerçek uygulamayı test etmek için Expo Go uygulamasını kullanın</p>
+            <p>🌐 Bu sayfa gerçek API'leri kullanır ve kapsamlı ürün veritabanına sahiptir</p>
+        </div>
+    </div>
+
+    <script>
+        let searchCount = 0;
+        
+        // Kapsamlı mock ürün veritabanı
+        const mockProducts = {
+            // Türk ürünleri (869 prefixi)
+            '8690504045014': { name: 'Çikolatalı Bisküvi', brand: 'Ülker', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Yıldız Holding', manufacturerCountry: 'Türkiye', category: 'Yiyecek' },
+            '8690632006116': { name: 'Meyve Suyu', brand: 'Dimes', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Dimes Gıda', manufacturerCountry: 'Türkiye', category: 'İçecek' },
+            '8690504001015': { name: 'Çay Bisküvisi', brand: 'Ülker', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Yıldız Holding', manufacturerCountry: 'Türkiye', category: 'Yiyecek' },
+            '8690637001011': { name: 'Ayran', brand: 'Sütaş', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Sütaş Süt Ürünleri', manufacturerCountry: 'Türkiye', category: 'İçecek' },
+            '8690504002012': { name: 'Kraker', brand: 'Eti', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Eti Gıda', manufacturerCountry: 'Türkiye', category: 'Yiyecek' },
+            '8690504003013': { name: 'Gofret', brand: 'Eti', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Eti Gıda', manufacturerCountry: 'Türkiye', category: 'Yiyecek' },
+            '8690632007014': { name: 'Portakal Suyu', brand: 'Dimes', country: 'Türkiye', countryFlag: '🇹🇷', manufacturer: 'Dimes Gıda', manufacturerCountry: 'Türkiye', category: 'İçecek' },
+            
+            // Uluslararası ürünler
+            '4902430735296': { name: 'Kit Kat', brand: 'Nestlé', country: 'İsviçre', countryFlag: '🇨🇭', manufacturer: 'Nestlé S.A.', manufacturerCountry: 'İsviçre', category: 'Yiyecek' },
+            '5449000000996': { name: 'Coca Cola', brand: 'Coca-Cola', country: 'ABD', countryFlag: '🇺🇸', manufacturer: 'The Coca-Cola Company', manufacturerCountry: 'ABD', category: 'İçecek' },
+            '7622210951965': { name: 'Toblerone', brand: 'Toblerone', country: 'İsviçre', countryFlag: '🇨🇭', manufacturer: 'Mondelez International', manufacturerCountry: 'İsviçre', category: 'Yiyecek' },
+            '3017620422003': { name: 'Nutella', brand: 'Ferrero', country: 'İtalya', countryFlag: '🇮🇹', manufacturer: 'Ferrero SpA', manufacturerCountry: 'İtalya', category: 'Yiyecek' },
+            '4056489314592': { name: 'Nivea Krem', brand: 'Nivea', country: 'Almanya', countryFlag: '🇩🇪', manufacturer: 'Beiersdorf AG', manufacturerCountry: 'Almanya', category: 'Kozmetik' },
+            
+            // Test barkodları
+            '1234567890123': { name: 'Test Ürünü', brand: 'Test Markası', country: 'ABD', countryFlag: '🇺🇸', manufacturer: 'Test Şirketi', manufacturerCountry: 'ABD', category: 'Diğer' }
+        };
+
+        // Gerçek API'lerden ürün arama
+        async function searchRealAPI(barcode) {
+            try {
+                console.log('Open Food Facts API deneniyor...');
+                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const data = await response.json();
+                
+                if (data.status === 1 && data.product) {
+                    const product = data.product;
+                    return {
+                        name: product.product_name || product.product_name_tr || product.product_name_en || 'Bilinmeyen Ürün',
+                        brand: product.brands || 'Bilinmeyen Marka',
+                        country: getCountryName(product.countries) || 'Bilinmeyen Menşei',
+                        countryFlag: getCountryFlag(product.countries) || '🌍',
+                        manufacturer: product.manufacturing_places || product.brands || 'Bilinmeyen Üretici',
+                        manufacturerCountry: getCountryName(product.manufacturing_places_tags) || 'Bilinmeyen',
+                        category: determineCategory(barcode),
+                        source: 'Open Food Facts API',
+                        image: product.image_url
+                    };
+                }
+            } catch (error) {
+                console.log('Open Food Facts API hatası:', error);
+            }
+            
+            try {
+                console.log('UPC Database API deneniyor...');
+                const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+                const data = await response.json();
+                
+                if (data.code === 'OK' && data.items && data.items.length > 0) {
+                    const item = data.items[0];
+                    return {
+                        name: item.title || 'Bilinmeyen Ürün',
+                        brand: item.brand || 'Bilinmeyen Marka',
+                        country: 'Bilinmeyen Menşei',
+                        countryFlag: '🌍',
+                        manufacturer: item.brand || 'Bilinmeyen Üretici',
+                        manufacturerCountry: 'Bilinmeyen',
+                        category: determineCategory(barcode),
+                        source: 'UPC Database API',
+                        image: item.images && item.images.length > 0 ? item.images[0] : null
+                    };
+                }
+            } catch (error) {
+                console.log('UPC Database API hatası:', error);
+            }
+            
+            return null;
+        }
+
+        function getCountryName(countries) {
+            if (!countries) return null;
+            
+            const countryMap = {
+                'tr': 'Türkiye', 'turkey': 'Türkiye',
+                'us': 'ABD', 'usa': 'ABD', 'united-states': 'ABD',
+                'de': 'Almanya', 'germany': 'Almanya',
+                'fr': 'Fransa', 'france': 'Fransa',
+                'it': 'İtalya', 'italy': 'İtalya',
+                'gb': 'İngiltere', 'uk': 'İngiltere', 'united-kingdom': 'İngiltere',
+                'jp': 'Japonya', 'japan': 'Japonya',
+                'cn': 'Çin', 'china': 'Çin',
+                'ch': 'İsviçre', 'switzerland': 'İsviçre'
+            };
+
+            const countryString = Array.isArray(countries) ? countries[0] : countries;
+            const normalizedCountry = countryString.toLowerCase().replace(/[^a-z-]/g, '');
+            
+            return countryMap[normalizedCountry] || countryString;
+        }
+
+        function getCountryFlag(countries) {
+            if (!countries) return null;
+            
+            const flagMap = {
+                'tr': '🇹🇷', 'turkey': '🇹🇷',
+                'us': '🇺🇸', 'usa': '🇺🇸', 'united-states': '🇺🇸',
+                'de': '🇩🇪', 'germany': '🇩🇪',
+                'fr': '🇫🇷', 'france': '🇫🇷',
+                'it': '🇮🇹', 'italy': '🇮🇹',
+                'gb': '🇬🇧', 'uk': '🇬🇧', 'united-kingdom': '🇬🇧',
+                'jp': '🇯🇵', 'japan': '🇯🇵',
+                'cn': '🇨🇳', 'china': '🇨🇳',
+                'ch': '🇨🇭', 'switzerland': '🇨🇭'
+            };
+
+            const countryString = Array.isArray(countries) ? countries[0] : countries;
+            const normalizedCountry = countryString.toLowerCase().replace(/[^a-z-]/g, '');
+            
+            return flagMap[normalizedCountry] || '🌍';
+        }
+
+        function determineCategory(barcode) {
+            const prefix = barcode.substring(0, 3);
+            
+            if (['200', '201', '202', '203', '204', '205', '206', '207', '208', '209'].includes(prefix) ||
+                ['290', '291', '292', '293', '294', '295', '296', '297', '298', '299'].includes(prefix)) {
+                return 'Yiyecek';
+            }
+            
+            if (['300', '301', '302', '303', '304', '305', '306', '307', '308', '309'].includes(prefix)) {
+                return 'İçecek';
+            }
+            
+            if (['400', '401', '402', '403', '404', '405', '406', '407', '408', '409'].includes(prefix) ||
+                ['500', '501', '502', '503', '504', '505', '506', '507', '508', '509'].includes(prefix)) {
+                return 'Kozmetik';
+            }
+            
+            return 'Diğer';
+        }
+
+        function validateBarcode(barcode) {
+            if (!barcode || !/^\d+$/.test(barcode)) {
+                return false;
+            }
+            
+            const length = barcode.length;
+            return length === 13 || length === 12 || length === 8 || length === 6;
+        }
+
+        async function searchProduct() {
+            const barcodeInput = document.getElementById('barcodeInput');
+            const barcode = barcodeInput.value.trim();
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const resultTitle = document.getElementById('resultTitle');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (!barcode) {
+                alert('Lütfen bir barkod numarası girin');
+                return;
+            }
+            
+            if (!validateBarcode(barcode)) {
+                showError('Geçersiz barkod formatı. Lütfen geçerli bir barkod girin.');
+                return;
+            }
+            
+            // Arama başlat
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '🔄 Aranıyor...';
+            resultDiv.classList.remove('error');
+            resultDiv.classList.add('show');
+            resultTitle.textContent = '🔄 Aranıyor...';
+            resultContent.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Ürün bilgisi aranıyor...</div>
+                </div>
+            `;
+            
+            // Önce mock veritabanında ara
+            let product = mockProducts[barcode];
+            let source = 'Yerel Veritabanı';
+            
+            // Mock'ta yoksa gerçek API'leri dene
+            if (!product) {
+                resultContent.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Gerçek API'lerden aranıyor...</div>
+                        <div style="font-size: 12px; margin-top: 10px; opacity: 0.8;">
+                            Open Food Facts & UPC Database
+                        </div>
+                    </div>
+                `;
+                
+                product = await searchRealAPI(barcode);
+                source = product ? product.source : null;
+            }
+            
+            // Sonuçları göster
+            setTimeout(() => {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '🔍 Ara';
+                searchCount++;
+                updateStats();
+                
+                if (product) {
+                    showSuccess(product, source, barcode);
+                } else {
+                    showError(`
+                        ⚠️ Ürün bilgisi bulunamadı<br>
+                        <small>Bu barkod için hiçbir kaynakta kayıt bulunamadı</small><br>
+                        <small style="margin-top: 10px; display: block;">💡 Türk ürünleri için 869 ile başlayan barkodları deneyin</small>
+                    `);
+                }
+            }, product ? 500 : 2000);
+        }
+
+        function showSuccess(product, source, barcode) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const resultTitle = document.getElementById('resultTitle');
+            
+            resultDiv.classList.remove('error');
+            resultTitle.textContent = '✅ Ürün Bulundu';
+            
+            resultContent.innerHTML = `
+                <div class="result-grid">
+                    <div class="result-item">
+                        <strong>Ürün:</strong>
+                        <span class="result-value">${product.name}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Marka:</strong>
+                        <span class="result-value">${product.brand}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Kategori:</strong>
+                        <span class="result-value">${product.category}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Menşei:</strong>
+                        <span class="result-value">${product.countryFlag} ${product.country}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Üretici:</strong>
+                        <span class="result-value">${product.manufacturer}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Üretici Ülkesi:</strong>
+                        <span class="result-value">${product.manufacturerCountry}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Barkod:</strong>
+                        <span class="result-value">${barcode}</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Kaynak:</strong>
+                        <span class="result-value">${source}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const resultTitle = document.getElementById('resultTitle');
+            
+            resultDiv.classList.add('error');
+            resultDiv.classList.add('show');
+            resultTitle.textContent = '❌ Ürün Bulunamadı';
+            resultContent.innerHTML = `<div style="text-align: center; color: #FF9800;">${message}</div>`;
+        }
+
+        function simulateCamera() {
+            const testBarcodes = Object.keys(mockProducts);
+            const randomBarcode = testBarcodes[Math.floor(Math.random() * testBarcodes.length)];
+            
+            document.getElementById('barcodeInput').value = randomBarcode;
+            
+            const btn = document.getElementById('cameraBtn');
+            btn.innerHTML = '📷 Taranıyor...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '📷 Rastgele';
+                btn.disabled = false;
+                searchProduct();
+            }, 1000);
+        }
+
+        function fillBarcode(barcode) {
+            document.getElementById('barcodeInput').value = barcode;
+        }
+
+        function clearResult() {
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('barcodeInput').value = '';
+        }
+
+        function updateStats() {
+            document.getElementById('totalSearches').textContent = searchCount;
+        }
+
+        // Enter tuşu ile arama
+        document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProduct();
+            }
+        });
+
+        // Sadece rakam girişi
+        document.getElementById('barcodeInput').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+</body>
+</html>
